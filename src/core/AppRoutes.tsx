@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, BrowserRouter, } from "react-router-dom";
-import App from '../App';
+import HomePage from '../pages/HomePage';
+import TaskPage, { TASK_STORE_DEFAULT, TaskStoreType } from '../pages/TaskPage';
 import Layout from './Layout';
 
+export type StoreType = {
+    task: TaskStoreType
+}
+
+export type PageType = {
+    store: StoreType,
+    setStore: (st: StoreType) => void
+}
+
 function AppRoutes() {
+    let [store, setStore] = useState({
+        task: TASK_STORE_DEFAULT
+    })
     return (
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<Layout />} >
-                    <Route index element={<App />} />
-                    <Route path="a" element={<App />} />
-                    <Route path="b" element={<App />} />
-                    <Route path="c" element={<App />} />
-                    <Route path="d" element={<App />} />
-                    <Route path="*" element={<App />} />
+                <Route path="/" element={<Layout store={store} setStore={setStore} />} >
+                    <Route index element={<HomePage store={store} setStore={setStore} />} />
+                    <Route path='tasks' element={<TaskPage store={store} setStore={setStore} />} />
                 </Route>
             </Routes>
         </BrowserRouter>
