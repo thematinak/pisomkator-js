@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from 'react-router';
-import { PageType } from '../core/AppRoutes';
+import { PageType, StoreType } from '../core/AppRoutes';
+import { Button, ButtonGroup, ButtonTypeEnum, CheckBox, Col, Row, TextArea } from '../core/FormItems';
+import { DeleteIcon, EditIcon } from '../core/IconComponent';
 import TableWithPages from '../core/TableWithPages';
 
 enum TaskLevelEnum {
@@ -11,11 +13,13 @@ enum TaskLevelEnum {
 }
 
 export type TaskStoreType = {
-  idForExam: number[]
+  tasksExam: {
+    [key: number]: TaskDataType
+  }
 }
 
 export const TASK_STORE_DEFAULT: TaskStoreType = {
-  idForExam: []
+  tasksExam: {}
 }
 
 type TaskDataType = {
@@ -52,6 +56,18 @@ const dummyData: TaskDataType[] = [
   },
 ];
 
+function handleSelected(isSelected: boolean, taskData: TaskDataType, store: StoreType, disp: (obj: any) => void) {
+  let newStore: StoreType = { ...store, task: { ...store.task, tasksExam: { ...store.task.tasksExam } } };
+
+  if (isSelected && newStore.task.tasksExam[taskData.id] === undefined) {
+    newStore.task.tasksExam[taskData.id] = taskData;
+    disp(newStore);
+  } else if (!isSelected && newStore.task.tasksExam[taskData.id] !== undefined) {
+    delete newStore.task.tasksExam[taskData.id];
+    disp(newStore);
+  }
+}
+
 function useQuery() {
   const { search } = useLocation();
   return React.useMemo(() => new URLSearchParams(search), [search]);
@@ -63,72 +79,72 @@ function TaskPage({ store, setStore }: PageType) {
   console.log(query.get("themeId"));
   return (
     <>
-      <ChoosenTasks ids={store.task.idForExam} />
+      <ChoosenTasks tasks={store.task.tasksExam} />
       <TableWithPages
-        loadData={(offset, pageSize) => dummyData.map(i => ({ id: i.id, data: i }))}
-        columnHandler={[{
-          name: 'Priklady',
-          renderer: (props: TaskDataType) => (
-            <ShowTask
-              taskData={props}
-              onChange={console.log}
-              onButtonActions={[{ label: 'Delete', type: 'danger', action: (() => console.log("delete", props.id)) }]} />
-          )
-        }]}
-        actions={[
+        loadData={(offset, pageSize) => dummyData}
+        columnHandler={[
           {
-            label: 'Pridaj do pisomky', action: ((ids) => {
-              setStore({ ...store, task: { idForExam: [...ids] } })
-              return true;
-            })
+            label: '#',
+            renderer: (props: TaskDataType) => (
+              <CheckBox
+                checked={store.task.tasksExam[props.id] !== undefined || false}
+                onChange={(e) => handleSelected(e.target.checked, props, store, setStore)} />
+            )
           },
           {
-            label: 'Vytvor pisomku', action: ((ids) => {
-              console.log(ids);
-              return true;
-            })
-          },
-        ]} />
+            label: '',
+            renderer: (props: TaskDataType) => <ShowRow {...props} />
+          }]} />
     </>
   );
 
 }
 
 type ChoosenTasksType = {
-  ids: number[]
+  tasks: {
+    [key: number]: TaskDataType
+  }
 }
-function ChoosenTasks({ ids }: ChoosenTasksType) {
-  const [tasks, setTasks] = useState<TaskDataType[]>([]);
-  useEffect(() => setTasks(dummyData.filter(i => ids.includes(i.id))), [ids]);
-  console.log('ChoosenTasks', ids, tasks, dummyData);
-
+function ChoosenTasks({ tasks }: ChoosenTasksType) {
   return (
     <div>
-      {tasks.map(i => <ShowTask key={i.id} taskData={i} />)}
+      {Object.values(tasks).map(i => <ShowTask key={i.id} taskData={i} />)}
     </div>
   );
 }
 
+function ShowRow(props: TaskDataType) {
+  const [showEdit, setShowEdit] = useState(false);
+  return (
+    <Row>
+      <Col size={10}>
+        <ShowTask
+          taskData={props}
+          edit={showEdit}
+          onChange={console.log} />
+      </Col>
+      <Col size={2}>
+        <ButtonGroup>
+          <Button lvl={ButtonTypeEnum.WARN} onClick={() => setShowEdit(!showEdit)}><EditIcon /></Button>
+          <Button lvl={ButtonTypeEnum.DANGER}><DeleteIcon /></Button>
+        </ButtonGroup>
+      </Col>
+    </Row>
+  );
+}
 
 type ShowTaskType = {
   taskData: TaskDataType,
+  edit?: boolean,
   onChange?: (data: string) => void,
-  onButtonActions?: {
-    label: string,
-    type: string,
-    action: (() => void)
-  }[]
 }
-function ShowTask({ taskData, onChange, onButtonActions }: ShowTaskType) {
+function ShowTask({ taskData, edit=false, onChange }: ShowTaskType) {
   let htmlTxt = { __html: String(taskData.htmlValue) }
-  const [showEdit, setShowEdit] = useState(false);
 
   return (
     <div>
-      {onChange && <button onClick={() => setShowEdit(!showEdit)} >Edit</button>}
-      {onButtonActions && onButtonActions.map(i => <button key={i.label} onClick={() => i.action()} >{i.label}</button>)}
       <div dangerouslySetInnerHTML={htmlTxt} />
-      {onChange && showEdit && <textarea value={taskData.latexText} onChange={e => onChange(e.target.value)} />}
+      { onChange && edit && <TextArea label='latex' value={taskData.latexText} onChange={e => onChange(e.target.value)} />}
     </div>
   );
 }

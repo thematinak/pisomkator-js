@@ -2,18 +2,21 @@ import React from 'react';
 
 import { Outlet } from 'react-router-dom';
 import { PageType } from './AppRoutes';
+import { Col, Row } from './FormItems';
 import Nav from './Nav';
 
 function Layout(pageData: PageType) {
     return (
-        <div className='container'>
-            <div className='row'>
-                <div className='col-3 text-left'>
-                    <Nav />
-                </div>
-                <div className='col'>
-                    <Outlet />
-                </div>
+        <div className='container card'>
+            <div className='card-body'>
+                <Row className='row '>
+                    <Col size={2}>
+                        <Nav />
+                    </Col>
+                    <Col>
+                        <Outlet />
+                    </Col>
+                </Row>
             </div>
         </div>
     );

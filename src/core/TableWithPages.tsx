@@ -6,71 +6,60 @@ type RowType = {
 }
 
 type PageProps = {
-    rowOffset: number,
     pageSize: number,
     page: number,
     pageMaxPage: number,
 }
 
 type ColumnHandler = {
-    name: string,
+    label: string,
     renderer: (data: any) => JSX.Element
 }
 
-function handleSelected(isSelected: boolean, id: number, state: { [id: number]: boolean }, disp: (obj: any) => void) {
-    if (isSelected) {
-        disp({ ...state, [id]: true });
-    } else {
-        let newState = { ...state };
-        delete newState[id];
-        disp(newState);
-    }
-}
+
 
 type TableWithPagesType = {
     columnHandler: ColumnHandler[],
-    actions: { label: string, action: (ids: number[]) => boolean }[]
     loadData: ((offset: number, size: number) => RowType[])
 }
-function TableWithPages({ columnHandler, actions, loadData }: TableWithPagesType) {
+function TableWithPages({ columnHandler, loadData }: TableWithPagesType) {
     const [pageProps, setPageProps] = useState<PageProps>({
-        rowOffset: 0,
         pageSize: 10,
         page: 0,
         pageMaxPage: 0
     });
     const [rowData, setData] = useState<RowType[]>([]);
-    const [selectedIds, setSelectedIds] = useState<{ [key: string]: boolean }>({});
-    useEffect(() => setData(loadData(pageProps.rowOffset, pageProps.pageSize)), [pageProps.rowOffset, pageProps.pageSize]);
+    
+    useEffect(() => setData(loadData(pageProps.page * pageProps.pageSize, pageProps.pageSize)), [pageProps.page, pageProps.pageSize, loadData]);
     if (rowData.length === 0) {
         return <div />
     }
-    console.log(selectedIds);
     return (
         <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th></th>
-                        {columnHandler.map(handler => <th key={handler.name}>{handler.name}</th>)}
-                    </tr>
-                </thead>
-                <tbody>
-                    {
-                        rowData.map(r =>
-                            <tr key={r.id}>
-                                <td><input type='checkbox' checked={selectedIds[r.id] || false} onChange={(e) => handleSelected(e.target.checked, r.id, selectedIds, setSelectedIds)} /></td>
-                                {columnHandler.map(handler => <td key={handler.name}>{handler.renderer({ key: handler.name, ...r[handler.name] })}</td>)}
-                            </tr>
-                        )
-                    }
-                </tbody>
-            </table>
             <div>
-                {actions.map((a) => <button key={a.label} onClick={() => a.action(Object.keys(selectedIds).map(Number))}>{a.label}</button>)}
-                <button onClick={() => setPageProps({ ...pageProps, page: pageProps.page - 1 })} disabled={pageProps.page < 1}>{'<'}</button>
-                {pageProps.page + 1}
-                <button onClick={() => setPageProps({ ...pageProps, page: pageProps.page + 1 })} disabled={pageProps.page >= pageProps.pageMaxPage}>{'>'}</button>
+                <table className='card-body table table-hover'>
+                    <thead>
+                        <tr>
+                            {columnHandler.map(handler => <th className='col' key={handler.label}>{handler.label}</th>)}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            rowData.map(r =>
+                                <tr key={r.id}>
+                                    {columnHandler.map(handler => <td className='col' key={handler.label}>{handler.renderer({ key: handler.label, ...r })}</td>)}
+                                </tr>
+                            )
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <ul className='pagination justify-content-end'>
+                    <li className='page-item'><button className='page-link' onClick={() => setPageProps({ ...pageProps, page: pageProps.page - 1 })} disabled={pageProps.page < 1}>{'<'}</button></li>
+                    <li className='page-item'><div className='page-link'>{pageProps.page + 1}</div></li>
+                    <li className='page-item'><button className='page-link' onClick={() => setPageProps({ ...pageProps, page: pageProps.page + 1 })} disabled={pageProps.page >= pageProps.pageMaxPage}>{'>'}</button></li>
+                </ul>
             </div>
         </div>
     );
