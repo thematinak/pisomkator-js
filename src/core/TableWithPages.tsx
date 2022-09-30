@@ -17,10 +17,9 @@ type ColumnHandler = {
 }
 
 
-
 type TableWithPagesType = {
     columnHandler: ColumnHandler[],
-    loadData: ((offset: number, size: number) => RowType[])
+    loadData: ((offset: number, size: number, getDataF: (data: RowType[]) => void) => void)
 }
 function TableWithPages({ columnHandler, loadData }: TableWithPagesType) {
     const [pageProps, setPageProps] = useState<PageProps>({
@@ -30,7 +29,7 @@ function TableWithPages({ columnHandler, loadData }: TableWithPagesType) {
     });
     const [rowData, setData] = useState<RowType[]>([]);
     
-    useEffect(() => setData(loadData(pageProps.page * pageProps.pageSize, pageProps.pageSize)), [pageProps.page, pageProps.pageSize, loadData]);
+    useEffect(() => loadData(pageProps.page * pageProps.pageSize, pageProps.pageSize, setData), [pageProps.page, pageProps.pageSize, loadData]);
     if (rowData.length === 0) {
         return <div />
     }

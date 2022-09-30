@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router';
+import { getTaskData, TaskApiType } from '../api/taskApi';
 import { PageType, StoreType } from '../core/AppRoutes';
 import { Button, ButtonGroup, ButtonTypeEnum, CheckBox, Col, Row, TextArea } from '../core/FormItems';
 import { DeleteIcon, EditIcon } from '../core/IconComponent';
 import TableWithPages from '../core/TableWithPages';
 
-enum TaskLevelEnum {
-  EASY = 'EASY',
-  MEDIUM = 'MEDIUM',
-  HARD = 'HARD',
-  SUPER_HARD = 'SUPER_HARD'
-}
 
 export type TaskStoreType = {
   tasksExam: {
-    [key: number]: TaskDataType
+    [key: number]: TaskApiType
   }
 }
 
@@ -22,41 +17,7 @@ export const TASK_STORE_DEFAULT: TaskStoreType = {
   tasksExam: {}
 }
 
-type TaskDataType = {
-  id: number,
-  level: TaskLevelEnum,
-  latexText: string,
-  htmlValue: string,
-}
-
-const dummyData: TaskDataType[] = [
-  {
-    id: 1,
-    level: TaskLevelEnum.EASY,
-    latexText: 'test1',
-    htmlValue: '<span>test1</span>'
-  },
-  {
-    id: 2,
-    level: TaskLevelEnum.EASY,
-    latexText: 'test2',
-    htmlValue: '<span>test2</span>'
-  },
-  {
-    id: 3,
-    level: TaskLevelEnum.EASY,
-    latexText: 'test3',
-    htmlValue: '<span>test3</span>'
-  },
-  {
-    id: 4,
-    level: TaskLevelEnum.EASY,
-    latexText: 'test4',
-    htmlValue: '<span>test4</span>'
-  },
-];
-
-function handleSelected(isSelected: boolean, taskData: TaskDataType, store: StoreType, disp: (obj: any) => void) {
+function handleSelected(isSelected: boolean, taskData: TaskApiType, store: StoreType, disp: (obj: any) => void) {
   let newStore: StoreType = { ...store, task: { ...store.task, tasksExam: { ...store.task.tasksExam } } };
 
   if (isSelected && newStore.task.tasksExam[taskData.id] === undefined) {
@@ -81,11 +42,11 @@ function TaskPage({ store, setStore }: PageType) {
     <>
       <ChoosenTasks tasks={store.task.tasksExam} />
       <TableWithPages
-        loadData={(offset, pageSize) => dummyData}
+        loadData={getTaskData}
         columnHandler={[
           {
             label: '#',
-            renderer: (props: TaskDataType) => (
+            renderer: (props: TaskApiType) => (
               <CheckBox
                 checked={store.task.tasksExam[props.id] !== undefined || false}
                 onChange={(e) => handleSelected(e.target.checked, props, store, setStore)} />
@@ -93,16 +54,15 @@ function TaskPage({ store, setStore }: PageType) {
           },
           {
             label: '',
-            renderer: (props: TaskDataType) => <ShowRow {...props} />
+            renderer: (props: TaskApiType) => <ShowRow {...props} />
           }]} />
     </>
   );
-
 }
 
 type ChoosenTasksType = {
   tasks: {
-    [key: number]: TaskDataType
+    [key: number]: TaskApiType
   }
 }
 function ChoosenTasks({ tasks }: ChoosenTasksType) {
@@ -113,15 +73,12 @@ function ChoosenTasks({ tasks }: ChoosenTasksType) {
   );
 }
 
-function ShowRow(props: TaskDataType) {
+function ShowRow(props: TaskApiType) {
   const [showEdit, setShowEdit] = useState(false);
   return (
     <Row>
       <Col size={10}>
-        <ShowTask
-          taskData={props}
-          edit={showEdit}
-          onChange={console.log} />
+        <ShowTask taskData={props} edit={showEdit} onChange={console.log} />
       </Col>
       <Col size={2}>
         <ButtonGroup>
@@ -134,7 +91,7 @@ function ShowRow(props: TaskDataType) {
 }
 
 type ShowTaskType = {
-  taskData: TaskDataType,
+  taskData: TaskApiType,
   edit?: boolean,
   onChange?: (data: string) => void,
 }
@@ -144,7 +101,7 @@ function ShowTask({ taskData, edit=false, onChange }: ShowTaskType) {
   return (
     <div>
       <div dangerouslySetInnerHTML={htmlTxt} />
-      { onChange && edit && <TextArea label='latex' value={taskData.latexText} onChange={e => onChange(e.target.value)} />}
+      { onChange && edit && <TextArea label='LaTeX' value={taskData.latexText} onChange={e => onChange(e.target.value)} />}
     </div>
   );
 }

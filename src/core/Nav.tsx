@@ -1,38 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getNav, NavApiType } from '../api/navApi';
 import { CollapseIcon, ExpandIcon } from './IconComponent';
 
-interface NavApi {
-    name: string,
-    pagePath?: string
-    query?: string
-    navItems?: NavApi[]
-}
-
-const NavData: NavApi[] = [
-    { name: 'Home', pagePath: '' },
-    {
-        name: 'nav2',
-        navItems: [
-            { name: 'nav2.1', pagePath: 'tasks', query: 'themeId=21' },
-            { name: 'nav2.2', pagePath: 'tasks', query: 'themeId=22' },
-            { name: 'nav2.3', pagePath: 'tasks', query: 'themeId=23' },
-            { name: 'nav2.4', pagePath: 'tasks', query: 'themeId=24' }
-        ]
-    },
-    { name: 'nav3', pagePath: 'tasks', query: 'themeId=31' },
-]
-
 function Nav() {
-    const navDatas = NavData;
+    const [navData, setNavData] = useState<NavApiType[]>([]);
+    useEffect(() => getNav(setNavData), []);
     return (
         <nav className='navbar'>
-            <NavUl items={navDatas}/>
+            <NavUl items={navData}/>
         </nav>
     );
 }
 
-function NavItem({ name, navItems, pagePath, query }: NavApi) {
+function NavItem({ name, navItems, pagePath, query }: NavApiType) {
     if (navItems === undefined) {
         let q = '';
         if (query !== undefined) {
@@ -47,7 +28,7 @@ function NavItem({ name, navItems, pagePath, query }: NavApi) {
 
 type NavExpandType = {
     name: string,
-    items: NavApi[]
+    items: NavApiType[]
 }
 function NavExpand({ name, items }: NavExpandType) {
     const [show, setShow] = useState(false);
@@ -67,7 +48,7 @@ function NavExpand({ name, items }: NavExpandType) {
 }
 
 type NavUlType = {
-    items: NavApi[],
+    items: NavApiType[],
 }
 function NavUl({ items }: NavUlType) {
     return (
