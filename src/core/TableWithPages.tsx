@@ -1,8 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-type RowType = {
+
+type TableRowDataType = {
     id: number,
     [key: string]: any
+}
+
+export interface RowType extends TableRowDataType {
+    forceReload: () => void
 }
 
 type PageProps = {
@@ -11,25 +16,23 @@ type PageProps = {
     pageMaxPage: number,
 }
 
-type ColumnHandler = {
+type ColumnHandler<R extends RowType> = {
     label: string,
-    renderer: (data: any) => JSX.Element
+    renderer: (data: R) => JSX.Element
 }
 
-
-type TableWithPagesType = {
-    columnHandler: ColumnHandler[],
-    loadData: ((offset: number, size: number, getDataF: (data: RowType[]) => void) => void)
+type TableWithPagesType<T> = {
+    columnHandler: ColumnHandler<T & RowType>[],
+    loadData: ((offset: number, size: number, getDataF: (data: T[]) => void) => void)
 }
-function TableWithPages({ columnHandler, loadData }: TableWithPagesType) {
-    const [pageProps, setPageProps] = useState<PageProps>({
-        pageSize: 10,
-        page: 0,
-        pageMaxPage: 0
-    });
-    const [rowData, setData] = useState<RowType[]>([]);
+function TableWithPages<T extends TableRowDataType>({ columnHandler, loadData }: TableWithPagesType<T>) {
+    const [pageProps, setPageProps] = useState<PageProps>({ pageSize: 10, page: 0, pageMaxPage: 0 });
+    const [rowData, setData] = useState<T[]>([]);
+    const [reload, setReload] = useState(Boolean);
+
+    useEffect(() => loadData(pageProps.page * pageProps.pageSize, pageProps.pageSize, setData), [pageProps.page, pageProps.pageSize, loadData, reload]);
+    const forceReload = useCallback(() => setReload(!reload), [reload]);
     
-    useEffect(() => loadData(pageProps.page * pageProps.pageSize, pageProps.pageSize, setData), [pageProps.page, pageProps.pageSize, loadData]);
     if (rowData.length === 0) {
         return <div />
     }
@@ -46,7 +49,7 @@ function TableWithPages({ columnHandler, loadData }: TableWithPagesType) {
                         {
                             rowData.map(r =>
                                 <tr key={r.id}>
-                                    {columnHandler.map(handler => <td className='col' key={handler.label}>{handler.renderer({ key: handler.label, ...r })}</td>)}
+                                    {columnHandler.map(handler => <td className='col' key={handler.label}>{handler.renderer({ key: handler.label, ...r, forceReload: forceReload })}</td>)}
                                 </tr>
                             )
                         }

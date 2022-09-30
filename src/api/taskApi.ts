@@ -5,7 +5,7 @@ export enum TaskLevelEnum {
     SUPER_HARD = 'SUPER_HARD'
 }
 
-const dummyData: TaskApiType[] = [
+let dummyData: TaskApiType[] = [
     {
         id: 1,
         level: TaskLevelEnum.EASY,
@@ -40,4 +40,21 @@ export type TaskApiType = {
 }
 export function getTaskData(offset: number, pageSize: number, callBack: (tastApi: TaskApiType[]) => void) {
     callBack(dummyData);
+}
+
+export function editTask(taskId: number, newData: TaskApiType, callBack: (result: boolean) => void) {
+    dummyData = dummyData.map(i => { 
+        if (i.id !== taskId) { 
+            return i;
+        } else {
+            return {...newData, htmlValue: `<span>${newData.latexText}</span>` };
+        } 
+    });
+    
+    callBack(true);
+}
+
+export function deleteTask(taskId: number, callBack: (result: boolean) => void) {
+    dummyData = dummyData.filter(t => t.id !== taskId);
+    callBack(true);
 }

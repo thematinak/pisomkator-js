@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router';
-import { getTaskData, TaskApiType } from '../api/taskApi';
+import { deleteTask, editTask, getTaskData, TaskApiType } from '../api/taskApi';
 import { PageType, StoreType } from '../core/AppRoutes';
 import { Button, ButtonGroup, ButtonTypeEnum, CheckBox, Col, Row, TextArea } from '../core/FormItems';
 import { DeleteIcon, EditIcon } from '../core/IconComponent';
-import TableWithPages from '../core/TableWithPages';
+import TableWithPages, { RowType } from '../core/TableWithPages';
 
 
 export type TaskStoreType = {
@@ -36,8 +36,8 @@ function useQuery() {
 
 function TaskPage({ store, setStore }: PageType) {
   let query = useQuery();
-
   console.log(query.get("themeId"));
+
   return (
     <>
       <ChoosenTasks tasks={store.task.tasksExam} />
@@ -46,7 +46,7 @@ function TaskPage({ store, setStore }: PageType) {
         columnHandler={[
           {
             label: '#',
-            renderer: (props: TaskApiType) => (
+            renderer: (props) => (
               <CheckBox
                 checked={store.task.tasksExam[props.id] !== undefined || false}
                 onChange={(e) => handleSelected(e.target.checked, props, store, setStore)} />
@@ -54,7 +54,17 @@ function TaskPage({ store, setStore }: PageType) {
           },
           {
             label: '',
-            renderer: (props: TaskApiType) => <ShowRow {...props} />
+            renderer: (props) => <ShowTableCol
+              changeCallBack={(newVal: string) =>
+                editTask(
+                  props.id,
+                  { ...props, latexText: newVal },
+                  (res) => {
+                    if (res) {
+                      props.forceReload();
+                    }
+                  })}
+              {...props} />
           }]} />
     </>
   );
@@ -73,17 +83,19 @@ function ChoosenTasks({ tasks }: ChoosenTasksType) {
   );
 }
 
-function ShowRow(props: TaskApiType) {
+
+type ShowTableColType = TaskApiType & RowType
+function ShowTableCol(props: ShowTableColType) {
   const [showEdit, setShowEdit] = useState(false);
   return (
     <Row>
       <Col size={10}>
-        <ShowTask taskData={props} edit={showEdit} onChange={console.log} />
+        <ShowTask taskData={props} edit={showEdit} changeCallBack={props.changeCallBack} />
       </Col>
       <Col size={2}>
         <ButtonGroup>
           <Button lvl={ButtonTypeEnum.WARN} onClick={() => setShowEdit(!showEdit)}><EditIcon /></Button>
-          <Button lvl={ButtonTypeEnum.DANGER}><DeleteIcon /></Button>
+          <Button lvl={ButtonTypeEnum.DANGER} onClick={() => deleteTask(props.id, (res) => { if (res) { props.forceReload() } })}><DeleteIcon /></Button>
         </ButtonGroup>
       </Col>
     </Row>
@@ -93,15 +105,24 @@ function ShowRow(props: TaskApiType) {
 type ShowTaskType = {
   taskData: TaskApiType,
   edit?: boolean,
-  onChange?: (data: string) => void,
+  changeCallBack?: (data: string) => void,
 }
-function ShowTask({ taskData, edit=false, onChange }: ShowTaskType) {
+function ShowTask({ taskData, edit = false, changeCallBack }: ShowTaskType) {
   let htmlTxt = { __html: String(taskData.htmlValue) }
-
+  const [text, setText] = useState(taskData.latexText);
   return (
     <div>
       <div dangerouslySetInnerHTML={htmlTxt} />
-      { onChange && edit && <TextArea label='LaTeX' value={taskData.latexText} onChange={e => onChange(e.target.value)} />}
+      {changeCallBack && edit && <TextArea
+        label='LaTeX'
+        value={text}
+        onChange={e => setText(e.target.value)}
+        onBlur={() => {
+          if (text !== taskData.latexText) {
+            changeCallBack(text);
+          }
+        }}
+      />}
     </div>
   );
 }
