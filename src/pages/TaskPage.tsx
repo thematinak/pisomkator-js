@@ -9,9 +9,11 @@ import TableWithPages, { RowType } from '../core/TableWithPages';
 
 
 export type TaskStoreType = {
-  tasksExam: {
-    [key: number]: TaskApiType
-  }
+  tasksExam: TasksExamType
+}
+
+export type TasksExamType = {
+  [key: number]: TaskApiType
 }
 
 export const TASK_STORE_DEFAULT: TaskStoreType = {
@@ -36,14 +38,13 @@ function useQuery() {
 }
 
 function TaskPage({ store, setStore }: PageType) {
-  let query = useQuery();
-  console.log(query.get("themeId"));
+  let query = useQuery().get("themeId");
 
   return (
     <>
       <ChoosenTasks tasks={store.task.tasksExam} />
       <TableWithPages
-        loadData={getTaskData}
+        loadData={(offset: number, size: number, f: (tastApi: TaskApiType[]) => void) => getTaskData(query || '', offset, size, f)}
         columnHandler={[
           {
             label: '#',
@@ -81,7 +82,7 @@ function ChoosenTasks({ tasks }: ChoosenTasksType) {
   return (
     <div>
       {taskArr.map(i => <ShowTask key={i.id} taskData={i} />)}
-      {taskArr.length !== 0 ? <Link className='btn btn-primary' to={'/tasksprint'}>Print</Link> : <div/>}
+      {taskArr.length !== 0 ? <Link className='btn btn-primary' to={'/tasksprint'}>Print</Link> : <div />}
     </div>
   );
 }

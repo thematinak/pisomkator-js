@@ -17,7 +17,7 @@ export type PageType = {
 function AppRoutes() {
     let [store, setStore] = useState({
         task: TASK_STORE_DEFAULT
-    })
+    });
     return (
         <BrowserRouter>
             <Routes>

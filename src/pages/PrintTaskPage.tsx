@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { PageType } from '../core/AppRoutes';
+import React from 'react';
+import { PageType, StoreType } from '../core/AppRoutes';
 import { Button, ButtonGroup, ButtonTypeEnum } from '../core/FormItems';
-import { ShowTask } from './TaskPage';
+import { ShowTask, TasksExamType } from './TaskPage';
 
 function suffle(arr: any[]) {
     let i = arr.length;
@@ -17,17 +17,20 @@ function suffle(arr: any[]) {
     return newArr;
 }
 
-function PrintTaskPage({ store, setStore }: PageType) {
-    const [tasks, setTasks] = useState(Object.values(store.task.tasksExam));
+function setTasksExam(storeState: StoreType, newTasksExam: TasksExamType) : StoreType {
+    return {...storeState, task: {...storeState.task, tasksExam: {...newTasksExam}}};
+}
 
+function PrintTaskPage({ store, setStore }: PageType) {
+    const tasks = suffle(Object.values(store.task.tasksExam));
     return (<>
         <ol className='list-group list-group-flush list-group-numbered'>
             {tasks.map(i => <li className='list-group-item' key={i.id}><ShowTask taskData={i} /></li>)}
         </ol>
         <div className='print-hide'>
             <ButtonGroup>
-                <Button lvl={ButtonTypeEnum.PRIMARY} onClick={() => setTasks(suffle(tasks))}>Zamiesaj</Button>
-                <Button lvl={ButtonTypeEnum.SUCCESS} onClick={() => setStore({...store, task: {...store.task, tasksExam: []}})}>Zmaz - skoncil som</Button>
+                <Button lvl={ButtonTypeEnum.PRIMARY} onClick={() => setStore(setTasksExam(store, store.task.tasksExam))}>Zamiesaj</Button>
+                <Button lvl={ButtonTypeEnum.SUCCESS} onClick={() => setStore(setTasksExam(store, {}))}>Zmaz - skoncil som</Button>
             </ButtonGroup>
         </div>
     </>

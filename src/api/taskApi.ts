@@ -38,7 +38,7 @@ export type TaskApiType = {
     latexText: string,
     htmlValue: string,
 }
-export function getTaskData(offset: number, pageSize: number, callBack: (tastApi: TaskApiType[]) => void) {
+export function getTaskData(themeId: string, offset: number, pageSize: number, callBack: (tastApi: TaskApiType[]) => void) {
     callBack(dummyData);
 }
 
