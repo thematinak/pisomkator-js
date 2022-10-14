@@ -24,7 +24,7 @@ function PrintTaskPage({ store, setStore }: PageType) {
         <ol className='list-group list-group-flush list-group-numbered'>
             {tasks.map(i => <li className='list-group-item' key={i.id}><ShowTask taskData={i} /></li>)}
         </ol>
-        <div className=''>
+        <div className='print-hide'>
             <ButtonGroup>
                 <Button lvl={ButtonTypeEnum.PRIMARY} onClick={() => setTasks(suffle(tasks))}>Zamiesaj</Button>
                 <Button lvl={ButtonTypeEnum.SUCCESS} onClick={() => setStore({...store, task: {...store.task, tasksExam: []}})}>Zmaz - skoncil som</Button>

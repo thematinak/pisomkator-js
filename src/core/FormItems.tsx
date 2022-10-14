@@ -66,8 +66,16 @@ interface RowType extends React.HTMLAttributes<HTMLDivElement> {
 };
 export const Row = (props:RowType) => <div className='row' {...props} />
 
+function classHandlers(size?: number, addClassName?: string) {
+    return (size === undefined ? 'col' : ('col-' + size))
+        + (size !== undefined && addClassName !== undefined ? ' ' : '')
+        + (addClassName === undefined ? '' : addClassName)
+    ;
+}
+
 interface ColType {
     size?: number,
+    addClassName?: string,
     children?: JSX.Element
 };
-export const Col = ({size, children}:ColType) => <div className={size === undefined ? 'col' : ('col-' + size)} children={children} />
+export const Col = ({size, addClassName, children}:ColType) => <div className={classHandlers(size, addClassName)} children={children} />

@@ -9,8 +9,8 @@ function Layout(pageData: PageType) {
     return (
         <div className='container card'>
             <div className='card-body'>
-                <Row className='row '>
-                    <Col size={2}>
+                <Row className='row'>
+                    <Col size={2} addClassName='print-hide'>
                         <Nav />
                     </Col>
                     <Col>

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import './index.css';
+import './app_style.css';
 import reportWebVitals from './reportWebVitals';
 import AppRoutes from './core/AppRoutes';
 

@@ -42,7 +42,6 @@ function TaskPage({ store, setStore }: PageType) {
   return (
     <>
       <ChoosenTasks tasks={store.task.tasksExam} />
-      <Link to={'/tasksprint'}>Print</Link>
       <TableWithPages
         loadData={getTaskData}
         columnHandler={[
@@ -78,9 +77,11 @@ type ChoosenTasksType = {
   }
 }
 function ChoosenTasks({ tasks }: ChoosenTasksType) {
+  const taskArr = Object.values(tasks);
   return (
     <div>
-      {Object.values(tasks).map(i => <ShowTask key={i.id} taskData={i} />)}
+      {taskArr.map(i => <ShowTask key={i.id} taskData={i} />)}
+      {taskArr.length !== 0 ? <Link className='btn btn-primary' to={'/tasksprint'}>Print</Link> : <div/>}
     </div>
   );
 }
