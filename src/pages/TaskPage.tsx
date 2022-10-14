@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router';
+import { Link } from 'react-router-dom';
 import { deleteTask, editTask, getTaskData, TaskApiType } from '../api/taskApi';
 import { PageType, StoreType } from '../core/AppRoutes';
 import { Button, ButtonGroup, ButtonTypeEnum, CheckBox, Col, Row, TextArea } from '../core/FormItems';
@@ -41,6 +42,7 @@ function TaskPage({ store, setStore }: PageType) {
   return (
     <>
       <ChoosenTasks tasks={store.task.tasksExam} />
+      <Link to={'/tasksprint'}>Print</Link>
       <TableWithPages
         loadData={getTaskData}
         columnHandler={[
@@ -107,7 +109,7 @@ type ShowTaskType = {
   edit?: boolean,
   changeCallBack?: (data: string) => void,
 }
-function ShowTask({ taskData, edit = false, changeCallBack }: ShowTaskType) {
+export function ShowTask({ taskData, edit = false, changeCallBack }: ShowTaskType) {
   let htmlTxt = { __html: String(taskData.htmlValue) }
   const [text, setText] = useState(taskData.latexText);
   return (
