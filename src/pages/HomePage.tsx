@@ -1,7 +1,6 @@
 import React from 'react';
-import { PageType } from '../core/AppRoutes';
 
-function HomePage(pageData:PageType) {
+function HomePage() {
     return <h1>Home Page</h1>
 }
 

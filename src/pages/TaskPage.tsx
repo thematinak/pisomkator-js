@@ -1,58 +1,41 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router';
 import { Link } from 'react-router-dom';
+import { useAtom } from 'jotai';
 import { deleteTask, editTask, getTaskData, TaskApiType } from '../api/taskApi';
-import { PageType, StoreType } from '../core/AppRoutes';
+import { ExamTasksType, EXAM_TASKS_ATOM } from '../core/AppState';
 import { Button, ButtonGroup, ButtonTypeEnum, CheckBox, Col, Row, TextArea } from '../core/FormItems';
 import { DeleteIcon, EditIcon } from '../core/IconComponent';
 import TableWithPages, { RowType } from '../core/TableWithPages';
+import { useQuery } from '../api/queryApi';
 
 
-export type TaskStoreType = {
-  tasksExam: TasksExamType
-}
-
-export type TasksExamType = {
-  [key: number]: TaskApiType
-}
-
-export const TASK_STORE_DEFAULT: TaskStoreType = {
-  tasksExam: {}
-}
-
-function handleSelected(isSelected: boolean, taskData: TaskApiType, store: StoreType, disp: (obj: any) => void) {
-  let newStore: StoreType = { ...store, task: { ...store.task, tasksExam: { ...store.task.tasksExam } } };
-
-  if (isSelected && newStore.task.tasksExam[taskData.id] === undefined) {
-    newStore.task.tasksExam[taskData.id] = taskData;
-    disp(newStore);
-  } else if (!isSelected && newStore.task.tasksExam[taskData.id] !== undefined) {
-    delete newStore.task.tasksExam[taskData.id];
-    disp(newStore);
+function handleSelected(isSelected: boolean, taskData: TaskApiType, examTasks: ExamTasksType, setter: (obj: ExamTasksType) => void) {
+  let newStore: ExamTasksType = { ...examTasks };
+  
+  if (isSelected && examTasks[taskData.id] === undefined) {
+    newStore[taskData.id] = taskData;
+    setter(newStore);
+  } else if (!isSelected && examTasks[taskData.id] !== undefined) {
+    delete newStore[taskData.id];
+    setter(newStore);
   }
 }
 
-function useQuery() {
-  const { search } = useLocation();
-  return React.useMemo(() => new URLSearchParams(search), [search]);
-}
-
-function TaskPage({ store, setStore }: PageType) {
-  let query = useQuery().get("themeId");
-
+function TaskPage() {
+  const query = useQuery().get("themeId") || '';
+  const [choosenTasks, setChoosenTasks] = useAtom(EXAM_TASKS_ATOM);
+  
   return (
     <>
-      <ChoosenTasks tasks={store.task.tasksExam} />
+      <ChoosenTasks />
       <TableWithPages
-        loadData={(offset: number, size: number, f: (tastApi: TaskApiType[]) => void) => getTaskData(query || '', offset, size, f)}
+        loadData={(offset: number, size: number, f: (tastApi: TaskApiType[]) => void) => getTaskData(query, offset, size, f)}
         columnHandler={[
           {
             label: '#',
-            renderer: (props) => (
-              <CheckBox
-                checked={store.task.tasksExam[props.id] !== undefined || false}
-                onChange={(e) => handleSelected(e.target.checked, props, store, setStore)} />
-            )
+            renderer: props => <CheckBox
+              checked={choosenTasks[props.id] !== undefined || false}
+              onChange={(e) => handleSelected(e.target.checked, props, choosenTasks, setChoosenTasks)} />
           },
           {
             label: '',
@@ -67,18 +50,15 @@ function TaskPage({ store, setStore }: PageType) {
                     }
                   })}
               {...props} />
-          }]} />
+          }
+        ]} />
     </>
   );
 }
 
-type ChoosenTasksType = {
-  tasks: {
-    [key: number]: TaskApiType
-  }
-}
-function ChoosenTasks({ tasks }: ChoosenTasksType) {
-  const taskArr = Object.values(tasks);
+function ChoosenTasks() {
+  const [choosenTasks] = useAtom(EXAM_TASKS_ATOM);
+  const taskArr = Object.values(choosenTasks);
   return (
     <div>
       {taskArr.map(i => <ShowTask key={i.id} taskData={i} />)}

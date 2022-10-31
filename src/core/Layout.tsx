@@ -1,11 +1,10 @@
 import React from 'react';
 
 import { Outlet } from 'react-router-dom';
-import { PageType } from './AppRoutes';
 import { Col, Row } from './FormItems';
 import Nav from './Nav';
 
-function Layout(pageData: PageType) {
+function Layout() {
     return (
         <div className='container card'>
             <div className='card-body'>

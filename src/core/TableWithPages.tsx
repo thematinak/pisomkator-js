@@ -16,7 +16,7 @@ type PageProps = {
     pageMaxPage: number,
 }
 
-type ColumnHandler<R extends RowType> = {
+export type ColumnHandler<R extends RowType> = {
     label: string,
     renderer: (data: R) => JSX.Element
 }
