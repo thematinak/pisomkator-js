@@ -1,8 +1,8 @@
 import React from 'react';
 import { Routes, Route, BrowserRouter, } from "react-router-dom";
 import HomePage from '../pages/HomePage';
-import PrintExamePage from '../pages/PrintTaskPage';
-import ExercisesPage from '../pages/TaskPage';
+import PrintExamePage from '../pages/PrintExamPage';
+import ExercisesPage from '../pages/ExercisesPage';
 import Layout from './Layout';
 
 export const EXERCISES_PAGE_PATH  = '/exercises';

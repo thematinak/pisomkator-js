@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { ExerciseApiType } from "../api/taskApi";
+import { ExerciseApiType } from "../api/exerciseApi";
 
 export type ExamExercisesType = {
     [key: number]: ExerciseApiType

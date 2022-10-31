@@ -2,7 +2,7 @@ import React from 'react';
 import { useAtom } from 'jotai';
 import { EXAM_EXERCISES_ATOM } from '../core/AppState';
 import { Button, ButtonGroup, ButtonTypeEnum } from '../core/FormItems';
-import { ShowExercise } from './TaskPage';
+import { ShowExercise } from './ExercisesPage';
 
 function suffle(arr: any[]) {
     let i = arr.length;

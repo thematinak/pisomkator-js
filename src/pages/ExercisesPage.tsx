@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { deleteExercise, editExercise, getExercisesData, ExerciseApiType } from '../api/taskApi';
+import { deleteExercise, editExercise, getExercisesData, ExerciseApiType } from '../api/exerciseApi';
 import { ExamExercisesType, EXAM_EXERCISES_ATOM } from '../core/AppState';
 import { Button, ButtonGroup, ButtonTypeEnum, CheckBox, Col, Row, TextArea } from '../core/FormItems';
 import { DeleteIcon, EditIcon } from '../core/IconComponent';
