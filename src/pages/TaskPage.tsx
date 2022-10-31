@@ -1,47 +1,48 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { deleteTask, editTask, getTaskData, TaskApiType } from '../api/taskApi';
-import { ExamTasksType, EXAM_TASKS_ATOM } from '../core/AppState';
+import { deleteExercise, editExercise, getExercisesData, ExerciseApiType } from '../api/taskApi';
+import { ExamExercisesType, EXAM_EXERCISES_ATOM } from '../core/AppState';
 import { Button, ButtonGroup, ButtonTypeEnum, CheckBox, Col, Row, TextArea } from '../core/FormItems';
 import { DeleteIcon, EditIcon } from '../core/IconComponent';
 import TableWithPages, { RowType } from '../core/TableWithPages';
 import { useQuery } from '../api/queryApi';
+import { EXAM_PRINT_PAGE_PATH } from '../core/AppRoutes';
 
 
-function handleSelected(isSelected: boolean, taskData: TaskApiType, examTasks: ExamTasksType, setter: (obj: ExamTasksType) => void) {
-  let newStore: ExamTasksType = { ...examTasks };
+function handleSelected(isSelected: boolean, exercises: ExerciseApiType, examExercises: ExamExercisesType, setter: (obj: ExamExercisesType) => void) {
+  let newStore: ExamExercisesType = { ...examExercises };
   
-  if (isSelected && examTasks[taskData.id] === undefined) {
-    newStore[taskData.id] = taskData;
+  if (isSelected && examExercises[exercises.id] === undefined) {
+    newStore[exercises.id] = exercises;
     setter(newStore);
-  } else if (!isSelected && examTasks[taskData.id] !== undefined) {
-    delete newStore[taskData.id];
+  } else if (!isSelected && examExercises[exercises.id] !== undefined) {
+    delete newStore[exercises.id];
     setter(newStore);
   }
 }
 
-function TaskPage() {
+function ExercisesPage() {
   const query = useQuery().get("themeId") || '';
-  const [choosenTasks, setChoosenTasks] = useAtom(EXAM_TASKS_ATOM);
+  const [choosenExercises, setChoosenExercises] = useAtom(EXAM_EXERCISES_ATOM);
   
   return (
     <>
-      <ChoosenTasks />
+      <ChoosenExercises />
       <TableWithPages
-        loadData={(offset: number, size: number, f: (tastApi: TaskApiType[]) => void) => getTaskData(query, offset, size, f)}
+        loadData={(offset: number, size: number, f: (tastApi: ExerciseApiType[]) => void) => getExercisesData(query, offset, size, f)}
         columnHandler={[
           {
             label: '#',
             renderer: props => <CheckBox
-              checked={choosenTasks[props.id] !== undefined || false}
-              onChange={(e) => handleSelected(e.target.checked, props, choosenTasks, setChoosenTasks)} />
+              checked={choosenExercises[props.id] !== undefined || false}
+              onChange={(e) => handleSelected(e.target.checked, props, choosenExercises, setChoosenExercises)} />
           },
           {
             label: '',
             renderer: (props) => <ShowTableCol
               changeCallBack={(newVal: string) =>
-                editTask(
+                editExercise(
                   props.id,
                   { ...props, latexText: newVal },
                   (res) => {
@@ -56,44 +57,44 @@ function TaskPage() {
   );
 }
 
-function ChoosenTasks() {
-  const [choosenTasks] = useAtom(EXAM_TASKS_ATOM);
-  const taskArr = Object.values(choosenTasks);
+function ChoosenExercises() {
+  const [choosenExercises] = useAtom(EXAM_EXERCISES_ATOM);
+  const exercises = Object.values(choosenExercises);
   return (
     <div>
-      {taskArr.map(i => <ShowTask key={i.id} taskData={i} />)}
-      {taskArr.length !== 0 ? <Link className='btn btn-primary' to={'/tasksprint'}>Print</Link> : <div />}
+      {exercises.map(i => <ShowExercise key={i.id} exercise={i} />)}
+      {exercises.length !== 0 ? <Link className='btn btn-primary' to={EXAM_PRINT_PAGE_PATH}>Print</Link> : <div />}
     </div>
   );
 }
 
 
-type ShowTableColType = TaskApiType & RowType
+type ShowTableColType = ExerciseApiType & RowType
 function ShowTableCol(props: ShowTableColType) {
   const [showEdit, setShowEdit] = useState(false);
   return (
     <Row>
       <Col size={10}>
-        <ShowTask taskData={props} edit={showEdit} changeCallBack={props.changeCallBack} />
+        <ShowExercise exercise={props} edit={showEdit} changeCallBack={props.changeCallBack} />
       </Col>
       <Col size={2}>
         <ButtonGroup>
           <Button lvl={ButtonTypeEnum.WARN} onClick={() => setShowEdit(!showEdit)}><EditIcon /></Button>
-          <Button lvl={ButtonTypeEnum.DANGER} onClick={() => deleteTask(props.id, (res) => { if (res) { props.forceReload() } })}><DeleteIcon /></Button>
+          <Button lvl={ButtonTypeEnum.DANGER} onClick={() => deleteExercise(props.id, (res) => { if (res) { props.forceReload() } })}><DeleteIcon /></Button>
         </ButtonGroup>
       </Col>
     </Row>
   );
 }
 
-type ShowTaskType = {
-  taskData: TaskApiType,
+type ShowExerciseType = {
+  exercise: ExerciseApiType,
   edit?: boolean,
   changeCallBack?: (data: string) => void,
 }
-export function ShowTask({ taskData, edit = false, changeCallBack }: ShowTaskType) {
-  let htmlTxt = { __html: String(taskData.htmlValue) }
-  const [text, setText] = useState(taskData.latexText);
+export function ShowExercise({ exercise, edit = false, changeCallBack }: ShowExerciseType) {
+  let htmlTxt = { __html: String(exercise.htmlValue) }
+  const [text, setText] = useState(exercise.latexText);
   return (
     <div>
       <div dangerouslySetInnerHTML={htmlTxt} />
@@ -102,7 +103,7 @@ export function ShowTask({ taskData, edit = false, changeCallBack }: ShowTaskTyp
         value={text}
         onChange={e => setText(e.target.value)}
         onBlur={() => {
-          if (text !== taskData.latexText) {
+          if (text !== exercise.latexText) {
             changeCallBack(text);
           }
         }}
@@ -111,4 +112,4 @@ export function ShowTask({ taskData, edit = false, changeCallBack }: ShowTaskTyp
   );
 }
 
-export default TaskPage;
+export default ExercisesPage;

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAtom } from 'jotai';
-import { EXAM_TASKS_ATOM } from '../core/AppState';
+import { EXAM_EXERCISES_ATOM } from '../core/AppState';
 import { Button, ButtonGroup, ButtonTypeEnum } from '../core/FormItems';
-import { ShowTask } from './TaskPage';
+import { ShowExercise } from './TaskPage';
 
 function suffle(arr: any[]) {
     let i = arr.length;
@@ -18,21 +18,21 @@ function suffle(arr: any[]) {
     return newArr;
 }
 
-function PrintTaskPage() {
-    const [choosenTasks, setChoosenTasks] = useAtom(EXAM_TASKS_ATOM);
-    const tasks = suffle(Object.values(choosenTasks));
+function PrintExamePage() {
+    const [choosenExercises, setChoosenExercises] = useAtom(EXAM_EXERCISES_ATOM);
+    const exercises = suffle(Object.values(choosenExercises));
     return (<>
         <ol className='list-group list-group-flush list-group-numbered'>
-            {tasks.map(i => <li className='list-group-item' key={i.id}><ShowTask taskData={i} /></li>)}
+            {exercises.map(i => <li className='list-group-item' key={i.id}><ShowExercise exercise={i} /></li>)}
         </ol>
         <div className='print-hide'>
             <ButtonGroup>
-                <Button lvl={ButtonTypeEnum.PRIMARY} onClick={() => setChoosenTasks({...choosenTasks})}>Zamiesaj</Button>
-                <Button lvl={ButtonTypeEnum.SUCCESS} onClick={() => setChoosenTasks({})}>Zmaz - skoncil som</Button>
+                <Button lvl={ButtonTypeEnum.PRIMARY} onClick={() => setChoosenExercises({...choosenExercises})}>Zamiesaj</Button>
+                <Button lvl={ButtonTypeEnum.SUCCESS} onClick={() => setChoosenExercises({})}>Zmaz - skoncil som</Button>
             </ButtonGroup>
         </div>
     </>
     );
 }
 
-export default PrintTaskPage;
+export default PrintExamePage;
